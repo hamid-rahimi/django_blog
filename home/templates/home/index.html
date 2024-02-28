@@ -30,7 +30,7 @@
         {% if True %}
             <tr>
                 <td scope="row">{{ a.title }}</td>
-                <td width="250px">{{ a.text|wordwrap:5 }}</td>
+                <td width="250px">{{ a.text|wordwrap:5 |truncatechars:22 }}</td>
                 <td>{{ a.author }}</td>
                 <td>{{ a.created_date|date:"Y/m/d -- H:i" }}</td>
                 <td><img src="{{ a.image.url }}"

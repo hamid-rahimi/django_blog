@@ -13,7 +13,7 @@
             {% endfor %}
         </div>
         <div class="input-form a-text">
-            <label for="{{ form.text.id_for_label}}" class="form-label">{{ form.title.label}}</label>
+            <label for="{{ form.text.id_for_label}}" class="form-label">{{ form.text.label}}</label>
             {{ form.text }}
             {% for error in form.text.errors %}
                 <smal class="text-warning fs-6">{{ error }}</smal>

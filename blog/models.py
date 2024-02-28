@@ -4,7 +4,7 @@ from django_jalali.db import models as jmaodels
 
 
 class Article(models.Model):
-
+    categories = models.ManyToManyField(to='Category')
     title = models.CharField(max_length=250)
     text = models.TextField()
     created_date = jmaodels.jDateTimeField(auto_now_add=True)
@@ -25,3 +25,10 @@ class Person(models.Model):
     def __str__(self):
         res = self.first_name + " " + self.last_name
         return res
+
+class Category(models.Model):
+    title = models.CharField(max_length=250)
+    
+    def __str__(self):
+        return self.title
+    

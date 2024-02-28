@@ -6,6 +6,52 @@
 {% endblock main_header %}
 {% block content %}
     {% comment %} <div>{{s_key}}</div> {% endcomment %}
+    <div class="container">
+        {% if categories %}
+        <nav class="navbar navbar-expand-lg navbar-light ">
+            <a class="navbar-brand" href="#">Categories</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    {% for category in categories %}
+                        <a class="nav-item nav-link active" href="{% url "blog:category_page" category.id %}">
+                            {{ category.title }}
+                        <span class="text-primary badge-pill">({% for count in count_of_category %}
+                            {% if category.title == count.title %}{{ count.article__count }}{% endif %}
+                            {% empty %}EMPTY
+                            {% endfor %})
+                        </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </nav>
+        {% endif %}
+        {% if authors %}
+        <nav class="navbar navbar-expand-lg navbar-light ">
+            <a class="navbar-brand" href="#">Authors</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    {% for author in authors %}
+                        <a class="nav-item nav-link active" href="{% url "blog:author_page" author.id %}">
+                            {{ author }}
+                        <span class="text-primary badge-pill">({% for count in count_of_article_per_author %}
+                            {% if author == count %}{{ count.article__count }}{% endif %}
+                            {% empty %}EMPTY
+                            {% endfor %})
+                        </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </nav>
+        {% endif %}
+    </div>
     <div class="album py-5 bg-body-tertiary">
         <div class="container">
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mb-5">
@@ -18,18 +64,29 @@
                             <text x="50%" y="50%" fill="#eceeef" dy=".3em">{{ article.title | capfirst }}</text>
                         </a>
                         <div class="card-body">
-                            <p class="card-text">این یک کارت گسترده تر با متن پشتیبانی در زیر به عنوان یک مقدمه طبیعی
-                                برای محتوای اضافی است. این محتوا کمی طولانی تر است.</p>
+                            <p class="card-text">{{ article.text| capfirst | truncatechars:55 }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <div class="btn-group">
+                                <div class="btn-group d-block">
                                     <a href="{% url "blog:update_page" article.id %}">
                                     <button type="button" class="btn btn-sm btn-outline-secondary">ویرایش</button></a>
                                     <a href="{% url "blog:blog_page" %}">
                                     <button type="button" class="btn btn-sm btn-outline-secondary">حذف</button></a>
                                 </div>
-                                
+
                                     <small class="text-body-secondary">{{ article.author.get_full_name }}</small>
-                                
+
+
+                            </div>
+                            <div class="d-block">
+                                    <small class="text-body-secondary">
+                                        {% comment %} {{count_of_category}} {% endcomment %}
+                                        {% for category in article.categories.all %}
+                                        
+                                           <span class="border {% cycle 'border-danger' 'boder-info' 'border-warning' %}"> {{ category }}</span>
+                                            
+                                        {% empty %}EMPTY
+                                        {% endfor %}
+                                    </small>
                             </div>
                         </div>
                     </div>

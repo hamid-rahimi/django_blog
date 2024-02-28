@@ -17,25 +17,25 @@ def user_login(request):
         loginForm = UserAcountLoginForm(data=request.POST)
         if loginForm.is_valid():
             # print(f"is valid: {loginForm.is_valid()}")
-            print(loginForm.cleaned_data)
+            # print(loginForm.cleaned_data)
 
             user_name = loginForm.cleaned_data.get('username')
             user_password = loginForm.cleaned_data.get('password')
             user = authenticate(request, username=user_name, password=user_password)
             if user is not None:
-                print('ok')
-                print(f"before login {request.user.is_authenticated}")
+                # print('ok')
+                # print(f"before login {request.user.is_authenticated}")
 
                 login(request, user)
 
-                print(f"after login {request.user.is_authenticated}")
+                # print(f"after login {request.user.is_authenticated}")
                 
                 if next:
                     return redirect(next)
                 else:
                     return redirect("blog:blog_page")
             else:
-                print('nok')
+                # print('nok')
                 loginForm.add_error('password', "رمز یا نام اشتب")
                 # loginForm.add_error('username',"نام کاربری  اشتب")
 
@@ -44,25 +44,25 @@ def user_login(request):
 
 
 def user_logout(request):
-    print(request.user)
+    # print(request.user)
 
     logout(request)
 
-    print(request.user)
+    # print(request.user)
     return redirect("blog:blog_page")
 
 
 def user_register(request):
     if request.user.is_authenticated:
         return redirect('blog:blog_page')
-    print(request.method)
+    # print(request.method)
     if request.method == 'GET':
         registerForm = UserAccountRegisterForm()
     else:
         registerForm = UserAccountRegisterForm(data=request.POST)
         if registerForm.is_valid():
             # print(f"is valid: {registerForm.is_valid()}")
-            print(registerForm.cleaned_data)
+            # print(registerForm.cleaned_data)
             first_name = registerForm.cleaned_data['first_name']
             last_name = registerForm.cleaned_data.get('last_name')
             email = registerForm.cleaned_data.get('email')
@@ -75,7 +75,7 @@ def user_register(request):
                 email=email,
                 username=username,
                 password=password_2)
-            print("create user")
+            # print("create user")
             return redirect('accounts:login_page')
 
     context = {

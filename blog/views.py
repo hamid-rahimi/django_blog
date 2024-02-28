@@ -1,31 +1,41 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from blog.models import Article, Person
+from blog.models import Article, Person, Category
 from blog.forms import CreateArticle, AddPerson, UpdateArticle
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Avg, Count
+from django.contrib.auth.models import User
 
 
 article_selected_id = 0
 
 def blog_page(request):
     article = Article.objects.all()
-    person = Person.objects.all()
-    # print(article)
-    # print(search_title)
+    authors = User.objects.all()
+    categories = Category.objects.all()
+    count_of_category = Category.objects.annotate(Count('article'))
+    count_of_article_per_author = User.objects.annotate(Count('article'))
+    # a=Article.categories.field_name
+    # print(count_of_article_per_author)
+    # print(a)
+    # print('++++++')
     search_key = request.GET.get("search_title")
-    print(request.GET.get('search_text'), 11)
+    # print(request.GET.get('search_text'), 11)
     if search_key:
         article = article.filter(title__icontains=search_key)
         
-    paginator = Paginator(article, 3)
+    paginator = Paginator(article, 6)
     num_page = request.GET.get('page')
     page_obj = paginator.get_page(num_page)
 
     context = {
         'articles': page_obj,
-        'persons': person,
+        'authors': authors,
         's_key': search_key,
+        'categories': categories,
+        'count_of_category': count_of_category,
+        'count_of_article_per_author': count_of_article_per_author,
     }
     return render(request, "blog/index.html", context)
 
@@ -44,14 +54,14 @@ def detail_page(request, article_id):
 @login_required
 def add_article(request):
     if request.user.is_authenticated:
-        print(request.method)
+        # print(request.method)
         if request.method == 'GET':
             form = CreateArticle()
         else:
             form = CreateArticle(data=request.POST, files=request.FILES)
             print(f"is valid: {form.is_valid()}")
             if form.is_valid():
-                print(form.cleaned_data)
+                # print(form.cleaned_data)
                 article_title = form.cleaned_data.get('title')
                 article_text = form.cleaned_data['text']
                 article_created_date = form.cleaned_data['created_date']
@@ -65,7 +75,7 @@ def add_article(request):
                                        author=request.user
                                     )
                 a = Article.objects.last().pk
-                print(f"last item is: {a}")
+                # print(f"last item is: {a}")
                 return redirect('blog:detail_page', a)
 
         context = {
@@ -78,14 +88,14 @@ def add_article(request):
 @login_required
 def add_person(request):
     if request.method == 'GET':
-        print(request.method)
+        # print(request.method)
         form_add = AddPerson()
     else:
-        print(request.method)
+        # print(request.method)
         form_add = AddPerson(data=request.POST)
         if form_add.is_valid():
-            print(f"is valid: {form_add.is_valid()}")
-            print(form_add.cleaned_data)
+            # print(f"is valid: {form_add.is_valid()}")
+            # print(form_add.cleaned_data)
             person_fname = form_add.cleaned_data.get('first_name')
             person_lname = form_add.cleaned_data.get('last_name')
             person_age = form_add.cleaned_data.get('age')
@@ -103,12 +113,12 @@ def add_person(request):
 @login_required
 def update_page(request, article_id):
     record = get_object_or_404(Article, id=article_id)
-    print(request.user.id)
-    print(record.author.id)
+    # print(request.user.id)
+    # print(record.author.id)
     if request.user.id != record.author.id:
-        return HttpResponse("page error...")
+        return HttpResponse(f"page error.../{request.user}/{record.author}")
     if request.method == 'GET':
-        print(record)
+        # print(record)
         article_form = UpdateArticle(initial={
             'title' : record.title,
             'text' : record.text,
@@ -146,3 +156,36 @@ def delete_page(request, article_id):
         return HttpResponse("page error...")
     record.delete()
     return redirect('blog:blog_page')
+
+def get_list_by_category(request, category_id):
+    articles = Article.objects.filter(categories=category_id)
+    categories = Category.objects.all()
+    count_of_category = Category.objects.annotate(Count('article'))
+    
+    paginator = Paginator(object_list=articles, per_page=3)
+    num_page = request.GET.get('page')
+    page_obj = paginator.get_page(number=num_page)
+    
+    context = {
+        'articles': page_obj,
+        'categories': categories,
+        'count_of_category': count_of_category,
+    }
+    return render(request, "blog\index.html", context)
+
+def get_list_by_author(request, author_id):
+    articles = Article.objects.filter(author__id=author_id)
+    # print(articles)
+    authors = User.objects.all()
+    count_of_article_per_author = User.objects.annotate(Count('article'))
+    
+    paginator = Paginator(object_list=articles, per_page=3)
+    num_page = request.GET.get('page')
+    page_obj = paginator.get_page(number=num_page)
+    
+    context = {
+        'articles':page_obj,
+        'authors':authors,
+        'count_of_article_per_author':count_of_article_per_author,
+    }
+    return render(request=request, template_name='blog/index.html', context=context)
